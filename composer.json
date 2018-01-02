@@ -13,6 +13,9 @@
     "php": ">=5.4.0"
   },
   "autoload": {
+    "psr-0": {
+      "Theia\\": "src/"
+    },
     "psr-4": {
       "Theia\\": "src/"
     }
