@@ -66,7 +66,7 @@ class Client {
      * @param string $component
      * @return null|string
      */
-    public function loadFromCache(string $key, string $componentLibrary, string $component): ?string
+    public function loadFromCache(string $key, string $componentLibrary, string $component)
     {
         return 'TODO: Not Implemented';
     }
