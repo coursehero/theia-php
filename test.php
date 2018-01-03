@@ -1,7 +1,7 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'src/TheiaClient.php';
+require 'src/Client.php';
 
 $componentLibrary = '@coursehero-components/mythos';
 $component = 'Greeting';
