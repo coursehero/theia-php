@@ -13,14 +13,16 @@ $client = new \Theia\Client('localhost:3000', [
   'CH-Auth' => 'courseherobatman'
 ]);
 
-$html = $client->render($componentLibrary, $component, $props);
-echo($html . "\n");
+$renderResult = $client->render($componentLibrary, $component, $props);
+echo($renderResult->getHtml() . "\n");
+echo(json_encode($renderResult->getAssets()['javascripts']) . "\n");
+echo(json_encode($renderResult->getAssets()['stylesheets']) . "\n");
 
-$html = $client->render($componentLibrary, $component, json_encode($props));
-echo($html . "\n");
+$renderResult = $client->render($componentLibrary, $component, json_encode($props));
+echo($renderResult->getHtml() . "\n");
 
-$html = $client->renderAndCache($componentLibrary, $component, $props);
-echo($html . "\n");
+$renderResult = $client->renderAndCache($componentLibrary, $component, $props);
+echo($renderResult->getHtml() . "\n");
 
-$html = $client->renderAndCache($componentLibrary, $component, json_encode($props));
-echo($html . "\n");
+$renderResult = $client->renderAndCache($componentLibrary, $component, json_encode($props));
+echo($renderResult->getHtml() . "\n");

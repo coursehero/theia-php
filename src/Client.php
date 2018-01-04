@@ -28,9 +28,9 @@ class Client {
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
-     * @return string
+     * @return RenderResult
      */
-    public function render(string $componentLibrary, string $component, $props): string
+    public function render(string $componentLibrary, string $component, $props): RenderResult
     {
         $options = [
             'headers' => $this->headers,
@@ -49,16 +49,19 @@ class Client {
 
         $client = new \GuzzleHttp\Client();
         $response = $client->post($this->endpoint . '/render', $options);
-        return $response->getBody()->getContents();
+        $html = $response->getBody()->getContents();
+        $assets = json_decode($response->getHeader('Theia-Assets')[0], true);
+
+        return new RenderResult($html, $assets);
     }
 
     /**
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
-     * @return string
+     * @return RenderResult
      */
-    public function renderAndCache(string $componentLibrary, string $component, $props): string
+    public function renderAndCache(string $componentLibrary, string $component, $props): RenderResult
     {
         if (is_array($props)) {
             $this->ksortRecursive($props);
@@ -75,7 +78,7 @@ class Client {
         // if (exists?($key)) load from cache ...
         // else $this->render($componentLibrary, $component, $propsAsString) and cache that
 
-        return 'TODO: Not Implemented';
+        return new RenderResult('TODO: Not Implemented', []);
     }
 
     /**
