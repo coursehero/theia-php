@@ -9,7 +9,8 @@ use JMS\DiExtraBundle\Annotation\Service;
 /**
  * @Service(TheiaProviderService::SERVICE_ID)
  */
-class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCourseHeroService {
+class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCourseHeroService
+{
     
     const SERVICE_ID = 'course_hero.theia.service.provider';
 
@@ -28,7 +29,8 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
      * @param string $endpoint
      * @param string $authKey
      */
-    public function inject(string $endpoint, string $authKey) {
+    public function inject(string $endpoint, string $authKey)
+    {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
     }
@@ -36,7 +38,8 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
     /**
      * @return \Theia\Client
      */
-    public function get() {
+    public function get()
+    {
         return new \Theia\Client($this->endpoint, [
             'CH-Auth' => $this->authKey
         ]);
