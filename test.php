@@ -2,6 +2,7 @@
 
 require 'vendor/autoload.php';
 require 'src/Client.php';
+require 'src/CachingStrategy.php';
 
 $componentLibrary = '@coursehero-components/mythos';
 $component = 'Greeting';
@@ -9,7 +10,19 @@ $props = [
   'name' => 'Connor Clark',
 ];
 
-$client = new \Theia\Client('localhost:3000', [
+class FakeCache implements \Theia\ICachingStrategy
+{
+    public function get(string $componentLibrary, string $component, string $key)
+    {
+        return null;
+    }
+
+    public function set(string $componentLibrary, string $component, string $key, \Theia\RenderResult $renderResult)
+    {
+    }
+}
+
+$client = new \Theia\Client('localhost:3000', new FakeCache(), [
   'CH-Auth' => 'courseherobatman'
 ]);
 
