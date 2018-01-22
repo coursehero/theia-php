@@ -12,7 +12,6 @@ use Theia\Client;
  */
 class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCourseHeroService
 {
-
     const SERVICE_ID = 'course_hero.theia.service.provider';
 
     /** @var string */
@@ -35,7 +34,7 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
      * @InjectParams({
      *     "endpoint"   = @Inject("%theia.endpoint%"),
      *     "authKey"    = @Inject("%theia.auth_key%"),
-     *     "theiaCache" = @Inject(TheiaCacheService::SERVICE_ID),
+     *     "theiaCacheService" = @Inject(TheiaCacheService::SERVICE_ID)
      * })
      *
      * @param string $endpoint
@@ -57,8 +56,8 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
         if (!self::$client) {
             self::$client = new Client(
                 $this->endpoint, $this->theiaCacheService, [
-                'CH-Auth' => $this->authKey,
-            ]
+                    'CH-Auth' => $this->authKey,
+                ]
             );
         }
 
