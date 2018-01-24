@@ -8,7 +8,7 @@ use CourseHero\UtilsBundle\Service\AbstractCourseHeroService;
 use JMS\DiExtraBundle\Annotation\Inject;
 use JMS\DiExtraBundle\Annotation\InjectParams;
 use JMS\DiExtraBundle\Annotation\Service;
-use Theia\ICachingStrategy;
+use Theia\CachingInterface;
 use Theia\RenderResult;
 
 /**
@@ -16,7 +16,7 @@ use Theia\RenderResult;
  * @package CourseHero\UtilsBundle\Service
  * @Service(TheiaCacheService::SERVICE_ID)
  */
-class TheiaCacheService extends AbstractCourseHeroService implements ICachingStrategy
+class TheiaCacheService extends AbstractCourseHeroService implements CachingInterface
 {
     const SERVICE_ID = 'course_hero.study_guide.service.theia_cache';
 
@@ -58,49 +58,10 @@ class TheiaCacheService extends AbstractCourseHeroService implements ICachingStr
     const TABLE_NAME = "dev_theia";
 
 
-
-    /**
-     * @param $key
-     * @return \Guzzle\Service\Resource\Model
-     */
-    public function getOld($key)
-    {
-        $response = $this->dynamoClient->getItem(
-            [
-                'Key' => [
-                    'key' => array('S' => $key),
-                ],
-                'TableName' => self::TABLE_NAME,
-            ]
-        );
-        return $response;
-    }
-
-    /**
-     * @param string $key
-     * @param string $html
-     * @param array $assets
-     * @param string $componentLibrary
-     */
-    public function setOld(string $key, string $html, array $assets, string $componentLibrary)
-    {
-        $response = $this->dynamoClient->putItem(
-            [
-                'TableName' => self::TABLE_NAME,
-                'Item' => [
-                    'key' => array('S' => $key),
-                    'html' => array('S' => $html),
-                    'assets' => array('SS' => $assets),
-                    'componentLibrary' => array('S' => $componentLibrary),
-                ],
-            ]
-        );
-    }
-
     /**
      * @inheritDoc
      */
-    public function get(string $componentLibrary, string $component, string $key)
+    public function get(string $key)
     {
         var_dump("inside get dynamo function");
         var_dump($key);
