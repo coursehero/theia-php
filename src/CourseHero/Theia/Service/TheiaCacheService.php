@@ -103,28 +103,46 @@ class TheiaCacheService extends AbstractCourseHeroService implements ICachingStr
     public function get(string $componentLibrary, string $component, string $key)
     {
         var_dump("inside get dynamo function");
-        $response = $this->dynamoClient->getItem(
+        var_dump($key);
+
+       /* $response = $this->dynamoClient->getItem(
             [
                 'Key' => [
-                    'key' => array('S' => $key),
+                    'key' => ['S' => $key],
                 ],
                 'TableName' => self::TABLE_NAME
             ]
         );
-        if ($response) {
-            $items = $response['Items'];
-            if ($items) {
-                $html = '';
-                $assets = [];
-                foreach ($items as $item) {
-                    $html = $item['html']['S'];
-                    $assets = $item['assets']['S'];
-                }
-                if ($html != '') {
-                    return new RenderResult($html, json_decode($assets));
-                }
+*/
+        $response = $this->dynamoClient->query(
+            [
+                'KeyConditions' => [
+                    'key' => [
+                        'ComparisonOperator' => 'EQ',
+                        'AttributeValueList' => [
+                            ['S' => $key],
+                        ],
+                    ]],
+                    'TableName' => self::TABLE_NAME
+                ]
+        );
+      //  var_dump("Response= ".$response);
+        $items = $response['Items'];
+
+        if ($items) {
+            var_dump("Items= ".$items);
+            $html = '';
+            $assets = [];
+            foreach ($items as $item) {
+                $html = $item['html']['S'];
+                $assets = $item['assets']['S'];
+            }
+           // var_dump("Value of html is: ".$html." done");
+            if ($html != '') {
+                return new RenderResult($html, json_decode($assets, true));
             }
         }
+
         var_dump("returning null");
         return null;
     }
@@ -139,10 +157,10 @@ class TheiaCacheService extends AbstractCourseHeroService implements ICachingStr
             [
                 'TableName' => self::TABLE_NAME,
                 'Item' => [
-                    'key' => array('S' => $key),
-                    'html' => array('S' => $renderResult->getHtml()),
-                    'assets' => array('S' => json_encode($renderResult->getAssets())),
-                    'componentLibrary' => array('S' => $componentLibrary)
+                    'key' => ['S' => $key],
+                    'html' => ['S' => $renderResult->getHtml()],
+                    'assets' => ['S' => json_encode($renderResult->getAssets())],
+                    'componentLibrary' => ['S' => $componentLibrary]
                 ],
             ]
         );
