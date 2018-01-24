@@ -3,18 +3,16 @@
 namespace Theia;
 
 /**
- * Interface ICachingStrategy
+ * Interface CachingInterface
  * @package Theia
  */
-interface ICachingStrategy
+interface CachingInterface
 {
     /**
-     * @param string $componentLibrary
-     * @param string $component
      * @param string $key
      * @return ?RenderResult
      */
-    public function get(string $componentLibrary, string $component, string $key);
+    public function get(string $key);
 
     /**
      * @param string $componentLibrary

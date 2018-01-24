@@ -10,8 +10,8 @@ class Client {
     /** @var string */
     private $endpoint;
 
-    /** @var ICachingStrategy */
-    private $cachingStrategy;
+    /** @var CachingInterface */
+    private $cachingInterface;
 
     /** @var array */
     private $headers;
@@ -19,13 +19,13 @@ class Client {
     /**
      * Client constructor.
      * @param string $endpoint
-     * @param ICachingStrategy $cachingStrategy
+     * @param CachingInterface $cachingInterface
      * @param ?array $headers
      */
-    public function __construct(string $endpoint, ICachingStrategy $cachingStrategy = null, array $headers = [])
+    public function __construct(string $endpoint, CachingInterface $cachingInterface = null, array $headers = [])
     {
         $this->endpoint = $endpoint;
-        $this->cachingStrategy = $cachingStrategy;
+        $this->cachingInterface = $cachingInterface;
         $this->headers = $headers;
     }
 
@@ -77,14 +77,14 @@ class Client {
 
         $hash = hash('md4', $propsAsString);
         $key = "$componentLibrary/$component/$hash";
-        $cachedRenderResult = $this->cachingStrategy->get($componentLibrary, $component, $key);
+        $cachedRenderResult = $this->cachingInterface->get($key);
 
         if ($cachedRenderResult) {
             return $cachedRenderResult;
         }
 
         $renderResult = $this->render($componentLibrary, $component, $propsAsString);
-        $this->cachingStrategy->set($componentLibrary, $component, $key, $renderResult);
+        $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult);
 
         return $renderResult;
     }

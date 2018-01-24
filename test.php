@@ -2,7 +2,7 @@
 
 require 'vendor/autoload.php';
 require 'src/Client.php';
-require 'src/CachingStrategy.php';
+require 'src/CachingInterface.php';
 
 $componentLibrary = '@coursehero-components/mythos';
 $component = 'Greeting';
@@ -10,9 +10,9 @@ $props = [
   'name' => 'Connor Clark',
 ];
 
-class FakeCache implements \Theia\ICachingStrategy
+class FakeCache implements \Theia\CachingInterface
 {
-    public function get(string $componentLibrary, string $component, string $key)
+    public function get(string $key)
     {
         return null;
     }
