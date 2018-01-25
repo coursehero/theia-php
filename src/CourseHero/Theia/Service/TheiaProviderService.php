@@ -2,6 +2,7 @@
 
 namespace CourseHero\TheiaBundle\Service;
 
+use CourseHero\TheiaBundle\TheiaCacheClient;
 use JMS\DiExtraBundle\Annotation\Inject;
 use JMS\DiExtraBundle\Annotation\InjectParams;
 use JMS\DiExtraBundle\Annotation\Service;
@@ -21,31 +22,18 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
     private $authKey;
 
     /**
-     * @var TheiaCacheService
-     */
-    private $theiaCacheService;
-
-    /**
-     * @var Client
-     */
-    private static $client;
-
-    /**
      * @InjectParams({
      *     "endpoint"   = @Inject("%theia.endpoint%"),
      *     "authKey"    = @Inject("%theia.auth_key%"),
-     *     "theiaCacheService" = @Inject(TheiaCacheService::SERVICE_ID)
      * })
      *
      * @param string $endpoint
      * @param string $authKey
-     * @param TheiaCacheService $theiaCacheService
      */
-    public function inject(string $endpoint, string $authKey, TheiaCacheService $theiaCacheService)
+    public function inject(string $endpoint, string $authKey)
     {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
-        $this->theiaCacheService = $theiaCacheService;
     }
 
     /**
@@ -53,15 +41,9 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
      */
     public function get()
     {
-        if (!self::$client) {
-            self::$client = new Client(
-                $this->endpoint, $this->theiaCacheService, [
-                    'CH-Auth' => $this->authKey,
-                ]
-            );
-        }
-
-        return self::$client;
+        return new \Theia\Client($this->endpoint, new TheiaCacheClient(), [
+            'CH-Auth' => $this->authKey
+        ]);
     }
 
 

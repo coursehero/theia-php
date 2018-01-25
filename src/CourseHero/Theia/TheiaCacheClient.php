@@ -1,6 +1,6 @@
 <?php
 
-namespace CourseHero\TheiaBundle\Service;
+namespace CourseHero\TheiaBundle;
 
 
 use Aws\DynamoDb\DynamoDbClient;
@@ -12,16 +12,18 @@ use Theia\CachingInterface;
 use Theia\RenderResult;
 
 /**
- * Class TheiaCacheService
- * @package CourseHero\UtilsBundle\Service
- * @Service(TheiaCacheService::SERVICE_ID)
+ * Class TheiaCacheClient
+ * @package CourseHero\TheiaBundle
  */
-class TheiaCacheService extends AbstractCourseHeroService implements CachingInterface
+class TheiaCacheClient implements CachingInterface
 {
-    const SERVICE_ID = 'course_hero.study_guide.service.theia_cache';
-
     /** @var DynamoDbClient */
     protected $dynamoClient;
+
+    /**
+     * @var string
+     */
+    private $theiaCacheTable;
 
 
     protected $amazonS3Key;
@@ -34,16 +36,19 @@ class TheiaCacheService extends AbstractCourseHeroService implements CachingInte
      *     "amazonS3Key"    = @Inject("%amazon_s3.key%"),
      *     "amazonS3Secret" = @Inject("%amazon_s3.secret%"),
      *     "amazonS3Region" = @Inject("%amazon_s3.region%"),
+     *     "theiaCacheTable"= @Inject("%theia.cache_table%"),
      * })
      * @param string $amazonS3Key
      * @param string $amazonS3Secret
      * @param string $amazonS3Region
+     * @param string $theiaCacheTable
      */
-    public function inject(string $amazonS3Key, string $amazonS3Secret, string $amazonS3Region)
+    public function inject(string $amazonS3Key, string $amazonS3Secret, string $amazonS3Region, string $theiaCacheTable)
     {
         $this->amazonS3Key = $amazonS3Key;
         $this->amazonS3Secret = $amazonS3Secret;
         $this->amazonS3Region = $amazonS3Region;
+        $this->theiaCacheTable = $theiaCacheTable;
 
         /** @var DynamoDbClient $client */
         $this->dynamoClient = DynamoDbClient::factory(
@@ -55,26 +60,11 @@ class TheiaCacheService extends AbstractCourseHeroService implements CachingInte
         );
     }
 
-    const TABLE_NAME = "dev_theia";
-
-
     /**
      * @inheritDoc
      */
     public function get(string $key)
     {
-        var_dump("inside get dynamo function");
-        var_dump($key);
-
-       /* $response = $this->dynamoClient->getItem(
-            [
-                'Key' => [
-                    'key' => ['S' => $key],
-                ],
-                'TableName' => self::TABLE_NAME
-            ]
-        );
-*/
         $response = $this->dynamoClient->query(
             [
                 'KeyConditions' => [
@@ -84,27 +74,23 @@ class TheiaCacheService extends AbstractCourseHeroService implements CachingInte
                             ['S' => $key],
                         ],
                     ]],
-                    'TableName' => self::TABLE_NAME
-                ]
+                'TableName' => $this->theiaCacheTable
+            ]
         );
-      //  var_dump("Response= ".$response);
+
         $items = $response['Items'];
 
         if ($items) {
-            var_dump("Items= ".$items);
             $html = '';
             $assets = [];
             foreach ($items as $item) {
                 $html = $item['html']['S'];
                 $assets = $item['assets']['S'];
             }
-           // var_dump("Value of html is: ".$html." done");
-            if ($html != '') {
-                return new RenderResult($html, json_decode($assets, true));
-            }
+
+            return new RenderResult($html, json_decode($assets, true));
         }
 
-        var_dump("returning null");
         return null;
     }
 
@@ -113,10 +99,9 @@ class TheiaCacheService extends AbstractCourseHeroService implements CachingInte
      */
     public function set(string $componentLibrary, string $component, string $key, RenderResult $renderResult)
     {
-        var_dump("inside set dynamao");
         $response = $this->dynamoClient->putItem(
             [
-                'TableName' => self::TABLE_NAME,
+                'TableName' => $this->theiaCacheTable,
                 'Item' => [
                     'key' => ['S' => $key],
                     'html' => ['S' => $renderResult->getHtml()],
@@ -126,4 +111,5 @@ class TheiaCacheService extends AbstractCourseHeroService implements CachingInte
             ]
         );
     }
+
 }
