@@ -12,10 +12,10 @@ use Theia\CachingInterface;
 use Theia\RenderResult;
 
 /**
- * Class TheiaCacheClient
+ * Class DynamoCache
  * @package CourseHero\TheiaBundle
  */
-class TheiaCacheClient implements CachingInterface
+class DynamoCache implements CachingInterface
 {
     /** @var DynamoDbClient */
     protected $dynamoClient;
