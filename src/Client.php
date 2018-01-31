@@ -10,17 +10,22 @@ class Client {
     /** @var string */
     private $endpoint;
 
+    /** @var CachingInterface */
+    private $cachingInterface;
+
     /** @var array */
     private $headers;
 
     /**
      * Client constructor.
      * @param string $endpoint
-     * @param array $headers
+     * @param CachingInterface $cachingInterface
+     * @param ?array $headers
      */
-    public function __construct(string $endpoint, array $headers = [])
+    public function __construct(string $endpoint, CachingInterface $cachingInterface = null, array $headers = [])
     {
         $this->endpoint = $endpoint;
+        $this->cachingInterface = $cachingInterface;
         $this->headers = $headers;
     }
 
@@ -72,13 +77,16 @@ class Client {
 
         $hash = hash('md4', $propsAsString);
         $key = "$componentLibrary/$component/$hash";
-        echo($key . "\n");
+        $cachedRenderResult = $this->cachingInterface->get($key);
 
-        // TODO:
-        // if (exists?($key)) load from cache ...
-        // else $this->render($componentLibrary, $component, $propsAsString) and cache that
+        if ($cachedRenderResult) {
+            return $cachedRenderResult;
+        }
 
-        return new RenderResult('TODO: Not Implemented', []);
+        $renderResult = $this->render($componentLibrary, $component, $propsAsString);
+        $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult);
+
+        return $renderResult;
     }
 
     /**
