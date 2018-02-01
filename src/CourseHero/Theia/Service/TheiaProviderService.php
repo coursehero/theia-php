@@ -2,16 +2,18 @@
 
 namespace CourseHero\TheiaBundle\Service;
 
+use CourseHero\TheiaBundle\DynamoCache;
+use CourseHero\UtilsBundle\Service\AbstractCourseHeroService;
 use JMS\DiExtraBundle\Annotation\Inject;
 use JMS\DiExtraBundle\Annotation\InjectParams;
 use JMS\DiExtraBundle\Annotation\Service;
+use Theia\Client;
 
 /**
  * @Service(TheiaProviderService::SERVICE_ID)
  */
-class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCourseHeroService
+class TheiaProviderService extends AbstractCourseHeroService
 {
-    
     const SERVICE_ID = 'course_hero.theia.service.provider';
 
     /** @var string */
@@ -22,8 +24,8 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
 
     /**
      * @InjectParams({
-     *        "endpoint"                = @Inject("%theia.endpoint%"),
-     *        "authKey"                 = @Inject("%theia.auth_key%")
+     *     "endpoint"   = @Inject("%theia.endpoint%"),
+     *     "authKey"    = @Inject("%theia.auth_key%"),
      * })
      *
      * @param string $endpoint
@@ -36,11 +38,11 @@ class TheiaProviderService extends \CourseHero\UtilsBundle\Service\AbstractCours
     }
 
     /**
-     * @return \Theia\Client
+     * @return Client
      */
-    public function get()
+    public function getClient()
     {
-        return new \Theia\Client($this->endpoint, [
+        return new \Theia\Client($this->endpoint, new DynamoCache(), [
             'CH-Auth' => $this->authKey
         ]);
     }
