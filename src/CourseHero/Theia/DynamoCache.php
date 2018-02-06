@@ -2,7 +2,6 @@
 
 namespace CourseHero\TheiaBundle;
 
-
 use Aws\DynamoDb\DynamoDbClient;
 use CourseHero\UtilsBundle\Service\AbstractCourseHeroService;
 use JMS\DiExtraBundle\Annotation\Inject;
@@ -111,5 +110,4 @@ class DynamoCache implements CachingInterface
             ]
         );
     }
-
 }
