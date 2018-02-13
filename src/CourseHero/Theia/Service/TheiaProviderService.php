@@ -2,7 +2,6 @@
 
 namespace CourseHero\TheiaBundle\Service;
 
-use CourseHero\TheiaBundle\DynamoCache;
 use CourseHero\UtilsBundle\Service\AbstractCourseHeroService;
 use JMS\DiExtraBundle\Annotation\Inject;
 use JMS\DiExtraBundle\Annotation\InjectParams;
@@ -23,18 +22,26 @@ class TheiaProviderService extends AbstractCourseHeroService
     private $authKey;
 
     /**
+     * @var DynamoCacheFactoryService
+     */
+    private $dynamoCacheFactoryService;
+
+    /**
      * @InjectParams({
      *     "endpoint"   = @Inject("%theia.endpoint%"),
      *     "authKey"    = @Inject("%theia.auth_key%"),
+     *     "dynamoCacheFactoryService"  = @Inject(DynamoCacheFactoryService::SERVICE_ID),
      * })
      *
      * @param string $endpoint
      * @param string $authKey
+     * @param DynamoCacheFactoryService $dynamoCacheFactoryService
      */
-    public function inject(string $endpoint, string $authKey)
+    public function inject(string $endpoint, string $authKey, DynamoCacheFactoryService $dynamoCacheFactoryService)
     {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
+        $this->dynamoCacheFactoryService = $dynamoCacheFactoryService;
     }
 
     /**
@@ -42,7 +49,7 @@ class TheiaProviderService extends AbstractCourseHeroService
      */
     public function getClient()
     {
-        return new \Theia\Client($this->endpoint, new DynamoCache(), [
+        return new \Theia\Client($this->endpoint, $this->dynamoCacheFactoryService->createDynamoCache(), [
             'CH-Auth' => $this->authKey
         ]);
     }
