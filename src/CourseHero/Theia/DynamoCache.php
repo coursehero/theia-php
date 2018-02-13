@@ -42,8 +42,7 @@ class DynamoCache implements CachingInterface
         $this->amazonS3Secret = $amazonS3Secret;
         $this->amazonS3Region = $amazonS3Region;
         $this->theiaCacheTable = $theiaCacheTable;
-
-        var_dump($amazonS3Region);
+        
         /** @var DynamoDbClient $client */
         $this->dynamoClient = DynamoDbClient::factory(
             [
