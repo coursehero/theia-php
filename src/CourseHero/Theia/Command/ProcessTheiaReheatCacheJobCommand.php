@@ -2,19 +2,12 @@
 
 namespace CourseHero\TheiaBundle\Command;
 
-use CourseHero\AdminBundle\Entity\UrlRemoval;
-use CourseHero\AdminBundle\Entity\UrlRemovalBatch;
-use CourseHero\AdminBundle\Entity\UrlRemovalBatchRepository;
-use CourseHero\AdminBundle\Entity\UrlRemovalRequest;
-use CourseHero\AdminBundle\Entity\UrlRemovalRequestRepository;
-use CourseHero\AdminBundle\Service\DmcaService;
 use CourseHero\QueueBundle\Component\QueueInterface;
 use CourseHero\QueueBundle\Component\QueueMessageInterface;
 use CourseHero\QueueBundle\Constant\Queue;
 use CourseHero\QueueBundle\Service\QueueService;
 use CourseHero\UtilsBundle\Command\AbstractPerpetualCommand;
 use CourseHero\UtilsBundle\Service\SlackMessengerService;
-use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -31,42 +24,49 @@ abstract class TheiaJobHandler
     protected function createRenderJob(string $component, string $props)
     {
         $message = $this->queue->createMessage($props);
-        $message->setAttributes([
-            'Type' => [
-                'DataType' => 'String',
-                'StringValue' => 'render-job'
-            ],
-            'ComponentLibrary' => [
-                'DataType' => 'String',
-                'StringValue' => $this->componentLibrary
-            ],
-            'Component' => [
-                'DataType' => 'String',
-                'StringValue' => $component
+        $message->setAttributes(
+            [
+                'Type' => [
+                    'DataType' => 'String',
+                    'StringValue' => 'render-job',
+                ],
+                'ComponentLibrary' => [
+                    'DataType' => 'String',
+                    'StringValue' => $this->componentLibrary,
+                ],
+                'Component' => [
+                    'DataType' => 'String',
+                    'StringValue' => $component,
+                ],
             ]
-        ]);
+        );
         $this->queue->sendMessage($message);
     }
 
     protected function createProducerJob(string $producerGroup)
     {
-        $message = $this->queue->createMessage([
-            'producerGroup' => $producerGroup
-        ]);
-        $message->setAttributes([
-            'Type' => [
-                'DataType' => 'String',
-                'StringValue' => 'producer-job'
-            ],
-            'ComponentLibrary' => [
-                'DataType' => 'String',
-                'StringValue' => $this->componentLibrary
+        $message = $this->queue->createMessage(
+            [
+                'producerGroup' => $producerGroup,
             ]
-        ]);
+        );
+        $message->setAttributes(
+            [
+                'Type' => [
+                    'DataType' => 'String',
+                    'StringValue' => 'producer-job',
+                ],
+                'ComponentLibrary' => [
+                    'DataType' => 'String',
+                    'StringValue' => $this->componentLibrary,
+                ],
+            ]
+        );
         $this->queue->sendMessage($message);
     }
 
     abstract public function processNewBuildJob(string $builtAt, string $commitHash);
+
     abstract public function processProducerJob(string $producerGroup);
 }
 
@@ -98,18 +98,17 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
  * Class ProcessTheiaReheatCacheJobCommand
  * @package CourseHero\TheiaBundle\Command
  *
- * Command used to process the UrlRemoval queue
+ * Command used to process the Theia cache reheat jobs
  */
 class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
 {
     const CMD_NAME = 'ch:theia:job';
 
-    // Number of times to try to find a new SQS item and get started on that
-    // Does not apply if no SQS item could be found at all
-    const RETRY_TIMES = 5;
-
     /** @var  QueueInterface */
     protected $queue;
+
+    /** @var array */
+    protected $handlers;
 
     protected function configure()
     {
@@ -123,9 +122,9 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
         $queue = $this->getQueue();
 
         $this->handlers = [
-            '@coursehero-components/study-guides' => new StudyGuideTheiaJobHandler($queue)
+            '@coursehero-components/study-guides' => new StudyGuideTheiaJobHandler($queue),
         ];
-        
+
         try {
             $message = $this->getQueueItem();
             if (!$message) {
@@ -133,7 +132,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
             }
 
             $this->write("Job processing started");
-            $job = $this->processJob($message);
+            $this->processJob($message);
             $this->write("Finished job");
             // $queue->deleteMessage($message);
         } catch (\Exception $e) {
@@ -153,19 +152,15 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     /**
      * Retrieves the next SQS item
      * Returns a message or null if one could not be found
+     * @return QueueMessageInterface|null
      */
     protected function getQueueItem()
     {
-        $queueName = $this->getQueueName();
-        $urlRemovalQueue = $this->getQueueService()->getQueue($queueName);
+        $queue = $this->getQueue();
         $this->write('Finding next queue item', OutputInterface::VERBOSITY_VERBOSE);
-        // if nothing left in the queue just return null, no need to retry
-        $message = $urlRemovalQueue->receiveMessage();
-        if (!$message) {
-            return null;
-        }
 
-        return $message;
+        // if nothing left in the queue just return null, no need to retry
+        return $queue->receiveMessage() ?: null;
     }
 
     protected function processJob(QueueMessageInterface $message)
@@ -181,9 +176,9 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
         if ($type === 'render-job') {
             $props = json_encode($body); // TODO $message->body is already deserialized into an object - this is a waste of processing for our use case.
             $this->processRenderJob($componentLibrary, $attrs['Component']['StringValue'], $props);
-        } else if ($type === 'producer-job') {
+        } elseif ($type === 'producer-job') {
             $jobHandler->processProducerJob($body['producerGroup']);
-        } else if ($type === 'new-build-job') {
+        } elseif ($type === 'new-build-job') {
             $jobHandler->processNewBuildJob($body['builtAt'], $body['commitHash']);
         } else {
             throw new \Exception("unexpected job type: $type");
@@ -193,24 +188,25 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     protected function processRenderJob(string $componentLibrary, string $component, string $propsAsJson)
     {
         $this->write("got a job ... \n");
-        var_dump($job);
 
         // TODO make theia request here
     }
 
-    protected function getQueue()
+    protected function getQueue(): QueueInterface
     {
         if ($this->queue) {
             return $this->queue;
         }
         $queueName = $this->getQueueName();
         $this->queue = $this->getQueueService()->getQueue($queueName);
+
         return $this->queue;
     }
 
     protected function getQueueName(): string
     {
         $environment = $this->getContainer()->getParameter('environment');
+
         return 'production' === $environment ? Queue::THEIA_REHEAT_JOBS : Queue::THEIA_REHEAT_JOBS_DEV;
     }
 
@@ -222,10 +218,5 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     protected function getSlackMessengerService(): SlackMessengerService
     {
         return $this->getContainer()->get(SlackMessengerService::SERVICE_ID);
-    }
-
-    protected function getEm(): EntityManager
-    {
-        return $this->getContainer()->get('doctrine.orm.entity_manager');
     }
 }
