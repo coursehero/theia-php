@@ -25,7 +25,7 @@ class TheiaProviderService extends AbstractCourseHeroService
     /**
      * @InjectParams({
      *     "endpoint"   = @Inject("%theia.endpoint%"),
-     *     "authKey"    = @Inject("%theia.auth_key%"),
+     *     "authKey"    = @Inject("%ch_internal.apiKey%"),
      * })
      *
      * @param string $endpoint
