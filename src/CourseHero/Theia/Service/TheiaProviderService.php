@@ -51,9 +51,14 @@ class TheiaProviderService extends AbstractCourseHeroService
      * @param string $amazonS3Region
      * @param string $theiaCacheTable
      */
-    public function inject(string $endpoint, string $authKey, string $amazonS3Key,
-        string $amazonS3Secret, string $amazonS3Region, string $theiaCacheTable)
-    {
+    public function inject(
+        string $endpoint,
+        string $authKey,
+        string $amazonS3Key,
+        string $amazonS3Secret,
+        string $amazonS3Region,
+        string $theiaCacheTable
+    ) {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
         $this->amazonS3Key = $amazonS3Key;
