@@ -2,63 +2,40 @@
 
 namespace CourseHero\TheiaBundle\Command;
 
-use CourseHero\QueueBundle\Component\QueueInterface;
-
 abstract class TheiaJobHandler
 {
     /** @var string */
     public static $componentLibrary;
 
-    /** @var QueueInterface */
-    protected $queue;
-
     /** @var \Theia\Client */
     protected $theiaClient;
 
-    public function __construct(QueueInterface $queue, \Theia\Client $theiaClient)
+    /** @var ReheatCacheJobCreator */
+    protected $jobCreator;
+
+    public function __construct(\Theia\Client $theiaClient, ReheatCacheJobCreator $jobCreator)
     {
-        $this->queue = $queue;
         $this->theiaClient = $theiaClient;
+        $this->jobCreator = $jobCreator;
     }
 
-    protected function createRenderJob(string $component, string $props)
-    {
-        $message = $this->queue->createMessage($props);
-        $message->setAttributes(
-            [
-                'Type' => [
-                    'DataType' => 'String',
-                    'StringValue' => 'render-job',
-                ],
-                'ComponentLibrary' => [
-                    'DataType' => 'String',
-                    'StringValue' => self::$componentLibrary,
-                ],
-                'Component' => [
-                    'DataType' => 'String',
-                    'StringValue' => $component,
-                ],
-            ]
-        );
-        $this->queue->sendMessage($message);
-    }
-
+    /**
+     * @param string $producerGroup
+     * @throws \Exception
+     */
     protected function createProducerJob(string $producerGroup)
     {
-        $message = $this->queue->createMessage(['producerGroup' => $producerGroup]);
-        $message->setAttributes(
-            [
-                'Type' => [
-                    'DataType' => 'String',
-                    'StringValue' => 'producer-job',
-                ],
-                'ComponentLibrary' => [
-                    'DataType' => 'String',
-                    'StringValue' => self::$componentLibrary,
-                ],
-            ]
-        );
-        $this->queue->sendMessage($message);
+        $this->jobCreator->createProducerJob(static::$componentLibrary, $producerGroup);
+    }
+
+    /**
+     * @param string $component
+     * @param string $props
+     * @throws \Exception
+     */
+    protected function createRenderJob(string $component, string $props)
+    {
+        $this->jobCreator->createRenderJob(static::$componentLibrary, $component, $props);
     }
 
     abstract public function processNewBuildJob(string $builtAt, string $commitHash);

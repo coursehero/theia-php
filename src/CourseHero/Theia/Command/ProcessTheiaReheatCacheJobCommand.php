@@ -45,7 +45,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
         $studyGuideConnectionService = $this->getStudyGuideConnectionService();
 
         $this->handlers = [
-            StudyGuideTheiaJobHandler::$componentLibrary => new StudyGuideTheiaJobHandler($queue, $theiaClient, $studyGuideConnectionService),
+            StudyGuideTheiaJobHandler::$componentLibrary => new StudyGuideTheiaJobHandler($theiaClient, new ReheatCacheJobCreator($queue), $studyGuideConnectionService),
         ];
 
         try {

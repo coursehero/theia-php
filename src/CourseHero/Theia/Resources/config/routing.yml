@@ -1,0 +1,3 @@
+course_hero_theia:
+    resource: "@CourseHeroTheiaBundle/Controller/"
+    type:     annotation

@@ -2,7 +2,6 @@
 
 namespace CourseHero\TheiaBundle\Command;
 
-use CourseHero\QueueBundle\Component\QueueInterface;
 use CourseHero\StudyGuideBundle\Constants\StageConstants;
 use CourseHero\StudyGuideBundle\Service\StudyGuideConnectionService;
 use JMS\Serializer\SerializerBuilder;
@@ -14,18 +13,19 @@ use StudyGuideBlocks\Blocks\SubtopicBlock;
 
 class StudyGuideTheiaJobHandler extends TheiaJobHandler
 {
+    public static $componentLibrary = '@coursehero-components/study-guides';
+
     /** @var StudyGuideConnectionService */
     private $studyGuideConnectionService;
 
     /** @var JMSSerializerBundle */
     private $jmsSerializer;
 
-    public function __construct(QueueInterface $queue, \Theia\Client $theiaClient, StudyGuideConnectionService $studyGuideConnectionService)
+    public function __construct(\Theia\Client $theiaClient, ReheatCacheJobCreator $jobCreator, StudyGuideConnectionService $studyGuideConnectionService)
     {
-        parent::__construct($queue, $theiaClient);
+        parent::__construct($theiaClient, $jobCreator);
         $this->studyGuideConnectionService = $studyGuideConnectionService;
         $this->jmsSerializer = SerializerBuilder::create()->build();
-        self::$componentLibrary = '@coursehero-components/study-guides';
     }
 
     /**
