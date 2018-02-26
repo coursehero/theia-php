@@ -69,7 +69,7 @@ class ReheatCacheJobCreator
 
         $success = $this->queue->sendMessage($message);
         if (!$success) {
-            throw new \Exception("Failed to send producer-job to queue");
+            throw new \Exception("Failed to send render-job to queue");
         }
     }
 }
