@@ -1,6 +1,6 @@
 <?php
 
-namespace CourseHero\TheiaBundle\Tests\Command;
+namespace CourseHero\TheiaBundle\Tests;
 
 use CourseHero\QueueBundle\Component\AmazonQueueMessage;
 use CourseHero\QueueBundle\Component\QueueInterface;

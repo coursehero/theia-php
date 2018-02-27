@@ -4,6 +4,7 @@ namespace CourseHero\TheiaBundle\Tests\Command;
 
 use CourseHero\QueueBundle\Component\QueueInterface;
 use CourseHero\TheiaBundle\Command\ReheatCacheJobCreator;
+use CourseHero\TheiaBundle\Tests\MockQueue;
 
 class ReheatCacheJobCreatorTest extends \PHPUnit_Framework_TestCase
 {
