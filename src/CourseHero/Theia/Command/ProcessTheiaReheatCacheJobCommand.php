@@ -54,13 +54,13 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
                 return; // if no more messages just return and restart for now
             }
             // Delete message from queue so long jobs don't get processed multiple times
-            $queue->deleteMessage($message);
+            $deleteSuccess = $queue->deleteMessage($message);
 
             $this->write("Job processing started");
             $this->processJob($message);
             $this->write("Finished job\n");
         } catch (\Exception $e) {
-            if (isset($message)) {
+            if (isset($message) && $deleteSuccess) {
                 $queue->sendMessage($message);
             }
             $this->write("Job failed {$e->getMessage()}");
