@@ -73,7 +73,8 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
                 '\?',
                 // '\(',
                 // '\)',
-                ','
+                ',',
+                '/'
             ];
             $removePatternsRegex = '/' . join('|', $removePatterns) . '/';
             $spacesReplaced = preg_replace('/\s/', '-', $string);
