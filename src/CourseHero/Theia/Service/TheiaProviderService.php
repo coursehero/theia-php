@@ -37,7 +37,7 @@ class TheiaProviderService extends AbstractCourseHeroService
     /**
      * @InjectParams({
      *     "endpoint"   = @Inject("%theia.endpoint%"),
-     *     "authKey"    = @Inject("%theia.auth_key%"),
+     *     "authKey"    = @Inject("%ch_internal.apiKey%"),
      *     "amazonS3Key"    = @Inject("%amazon_s3.key%"),
      *     "amazonS3Secret" = @Inject("%amazon_s3.secret%"),
      *     "amazonS3Region" = @Inject("%amazon_s3.region%"),
@@ -51,9 +51,14 @@ class TheiaProviderService extends AbstractCourseHeroService
      * @param string $amazonS3Region
      * @param string $theiaCacheTable
      */
-    public function inject(string $endpoint, string $authKey, string $amazonS3Key,
-        string $amazonS3Secret, string $amazonS3Region, string $theiaCacheTable)
-    {
+    public function inject(
+        string $endpoint,
+        string $authKey,
+        string $amazonS3Key,
+        string $amazonS3Secret,
+        string $amazonS3Region,
+        string $theiaCacheTable
+    ) {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
         $this->amazonS3Key = $amazonS3Key;

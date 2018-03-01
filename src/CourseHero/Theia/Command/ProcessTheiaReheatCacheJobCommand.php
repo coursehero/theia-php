@@ -111,7 +111,6 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
                 break;
             default:
                 throw new \Exception("unexpected job type: $type");
-                break;
         }
     }
 
