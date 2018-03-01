@@ -30,7 +30,7 @@ class ReheatCacheController extends AbstractCourseHeroController
      *          403="Access Denied"
      *     }
      * )
-     * @Rest\Post("/api/v1/theia-reheat-cache/", name="theia_reheat_cache")
+     * @Rest\Post("api/v1/theia-reheat-cache/", name="theia_reheat_cache")
      * @param Request $request
      * @return Response
      * @throws \Exception
