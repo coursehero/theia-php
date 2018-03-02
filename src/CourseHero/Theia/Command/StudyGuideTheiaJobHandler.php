@@ -36,6 +36,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     public function processNewBuildJob(string $builtAt, string $commitHash)
     {
         $courseBlocks = $this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED);
+        // TODO this is causing the body to be serialized twice, because it will be serialized again when the message is sent
         $this->createRenderJob('IndexApp', $this->jmsSerializer->serialize(['courses' => $courseBlocks], 'json'));
 
         /** @var CourseBlock $courseBlock */

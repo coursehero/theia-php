@@ -105,7 +105,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
                 break;
             case 'render-job':
                 // Don't use jms deserializer here because the code that creates render-jobs uses the jms serializer. So, the data is in the exact structure we want already
-                $props = json_encode($body); // TODO $message->body is already deserialized into an object - this is a waste of processing for our use case.
+                $props = $body;
                 $component = $attrs['Component']['StringValue'];
                 $this->processRenderJob($componentLibrary, $component, $props);
                 break;
