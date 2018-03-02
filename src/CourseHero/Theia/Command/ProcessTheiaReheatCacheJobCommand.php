@@ -38,48 +38,43 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
             ->setDescription('Processes a Theia cache reheat job');
     }
 
-    public function singleRun(InputInterface $input, OutputInterface $output)
+    /**
+     * @inheritdoc
+     */
+    protected function setup()
     {
-        $queue = $this->getQueue();
-        $theiaClient = $this->getTheiaClient();
+        $this->queue = $this->getQueueService()->getQueue($this->getQueueName());
+        $this->theiaClient = $this->getTheiaProviderService()->getClient();
         $studyGuideConnectionService = $this->getStudyGuideConnectionService();
 
         $this->handlers = [
-            StudyGuideTheiaJobHandler::$componentLibrary => new StudyGuideTheiaJobHandler($theiaClient, new ReheatCacheJobCreator($queue), $studyGuideConnectionService),
+            StudyGuideTheiaJobHandler::$componentLibrary => new StudyGuideTheiaJobHandler($this->theiaClient, new ReheatCacheJobCreator($this->queue), $studyGuideConnectionService),
         ];
+    }
 
+    /**
+     * @inheritdoc
+     */
+    public function singleRun(InputInterface $input, OutputInterface $output)
+    {
         try {
-            $message = $this->getQueueItem();
+            $message = $this->queue->receiveMessage() ?: null;
             if (!$message) {
                 return; // if no more messages just return and restart for now
             }
             // Delete message from queue so long jobs don't get processed multiple times
-            $queue->deleteMessage($message);
+            $deleteSuccess = $this->queue->deleteMessage($message);
 
             $this->write("Job processing started");
             $this->processJob($message);
             $this->write("Finished job\n");
         } catch (\Exception $e) {
-            if (isset($message)) {
-                $queue->sendMessage($message);
+            if (isset($message) && $deleteSuccess) {
+                $this->queue->sendMessage($message);
             }
             $this->write("Job failed {$e->getMessage()}");
             $this->sendSlackMessage("Exception: {$e->getMessage()}");
         }
-    }
-
-    /**
-     * Retrieves the next SQS item
-     * Returns a message or null if one could not be found
-     * @return QueueMessageInterface|null
-     */
-    protected function getQueueItem()
-    {
-        $queue = $this->getQueue();
-        $this->write('Finding next queue item', OutputInterface::VERBOSITY_VERBOSE);
-
-        // if nothing left in the queue just return null, no need to retry
-        return $queue->receiveMessage() ?: null;
     }
 
     /**
@@ -101,48 +96,33 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
             $this->write("Body: $bodyAsString");
         }
 
-        if ($type === 'new-build-job') {
-            $jobHandler->processNewBuildJob($body['builtAt'], $body['commitHash']);
-        } elseif ($type === 'producer-job') {
-            $jobHandler->processProducerJob($body['producerGroup'], $body);
-        } elseif ($type === 'render-job') {
-            $props = json_encode($body); // TODO $message->body is already deserialized into an object - this is a waste of processing for our use case.
-            $component = $attrs['Component']['StringValue'];
-            $this->processRenderJob($componentLibrary, $component, $props);
-        } else {
-            throw new \Exception("unexpected job type: $type");
+        switch ($type) {
+            case 'new-build-job':
+                $jobHandler->processNewBuildJob($body['builtAt'], $body['commitHash']);
+                break;
+            case 'producer-job':
+                $jobHandler->processProducerJob($body['producerGroup'], $body);
+                break;
+            case 'render-job':
+                // Don't use jms deserializer here because the code that creates render-jobs uses the jms serializer. So, the data is in the exact structure we want already
+                $props = json_encode($body); // TODO $message->body is already deserialized into an object - this is a waste of processing for our use case.
+                $component = $attrs['Component']['StringValue'];
+                $this->processRenderJob($componentLibrary, $component, $props);
+                break;
+            default:
+                throw new \Exception("unexpected job type: $type");
         }
     }
 
     protected function processRenderJob(string $componentLibrary, string $component, string $props)
     {
-        $this->getTheiaClient()->renderAndCache($componentLibrary, $component, $props, true);
-    }
-
-    protected function getQueue(): QueueInterface
-    {
-        if (!$this->queue) {
-            $queueName = $this->getQueueName();
-            $this->queue = $this->getQueueService()->getQueue($queueName);
-        }
-
-        return $this->queue;
+        $this->theiaClient->renderAndCache($componentLibrary, $component, $props, true);
     }
 
     protected function getQueueName(): string
     {
         $environment = $this->getContainer()->getParameter('environment');
-
         return 'production' === $environment ? Queue::THEIA_REHEAT_JOBS : Queue::THEIA_REHEAT_JOBS_DEV;
-    }
-
-    protected function getTheiaClient(): \Theia\Client
-    {
-        if (!$this->theiaClient) {
-            $this->theiaClient = $this->getTheiaProviderService()->getClient();
-        }
-
-        return $this->theiaClient;
     }
 
     protected function sendSlackMessage(string $text)
@@ -155,7 +135,6 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     protected function getSlackChannelName(): string
     {
         $environment = $this->getContainer()->getParameter('environment');
-
         return 'production' === $environment ? '#theia-errors-prod' : '#theia-errors-dev';
     }
 
