@@ -64,9 +64,10 @@ class Client {
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
+     * @param bool $force - always render even if key is already in cache
      * @return RenderResult
      */
-    public function renderAndCache(string $componentLibrary, string $component, $props): RenderResult
+    public function renderAndCache(string $componentLibrary, string $component, $props, bool $force = false): RenderResult
     {
         if (is_array($props)) {
             $this->ksortRecursive($props);
@@ -77,10 +78,11 @@ class Client {
 
         $hash = hash('md4', $propsAsString);
         $key = "$componentLibrary/$component/$hash";
-        $cachedRenderResult = $this->cachingInterface->get($key);
-
-        if ($cachedRenderResult) {
-            return $cachedRenderResult;
+        if (!$force) {
+            $cachedRenderResult = $this->cachingInterface->get($key);
+            if ($cachedRenderResult) {
+                return $cachedRenderResult;
+            }
         }
 
         $renderResult = $this->render($componentLibrary, $component, $propsAsString);
