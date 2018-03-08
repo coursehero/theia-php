@@ -67,6 +67,11 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     public function processProducerJob(string $producerGroup)
     {
         $courseTree = $this->studyGuideConnectionService->getCourseTree($producerGroup, StageConstants::STAGE_PUBLISHED);
+
+        // course landing view
+        $props = self::getProps($courseTree, $courseTree);
+        $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
+
         /** @var Block $block */
         foreach ($courseTree->createIterator() as $block) {
             if (in_array($block->getBlockType(), [SectionBlock::BLOCK_TYPE, SubtopicBlock::BLOCK_TYPE])) {
