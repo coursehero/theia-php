@@ -7,6 +7,8 @@ namespace Theia;
  * @package Theia
  */
 class Client {
+    const THIRTY_DAYS = 30 * 24 * 60 * 60;
+
     /** @var string */
     private $endpoint;
 
@@ -65,10 +67,17 @@ class Client {
      * @param string $component
      * @param string|array $props
      * @param bool $force - always render even if key is already in cache
+     * @param int $secondsUntilExpires - Number of seconds until item will expire in
+     *      cache and be removed from the cache.
      * @return RenderResult
      */
-    public function renderAndCache(string $componentLibrary, string $component, $props, bool $force = false): RenderResult
-    {
+    public function renderAndCache(
+        string $componentLibrary,
+        string $component,
+        $props,
+        bool $force = false,
+        int $secondsUntilExpires = self::THIRTY_DAYS
+    ): RenderResult {
         if (is_array($props)) {
             $this->ksortRecursive($props);
             $propsAsString = json_encode($props);
@@ -86,7 +95,7 @@ class Client {
         }
 
         $renderResult = $this->render($componentLibrary, $component, $propsAsString);
-        $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult);
+        $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult, $secondsUntilExpires);
 
         return $renderResult;
     }
