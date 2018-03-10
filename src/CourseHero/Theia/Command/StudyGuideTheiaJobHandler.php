@@ -49,7 +49,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public function processNewBuildJob(string $builtAt, string $commitHash)
     {
-        $courseBlocks = $this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED);
+        $courseBlocks = $this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED, false);
         // TODO this is causing the body to be serialized twice, because it will be serialized again when the message is sent
         // TODO commented out b/c we currently do not even use IndexApp
         // $this->createRenderJob('IndexApp', $this->jmsSerializer->serialize(['courses' => $courseBlocks], 'json'));
@@ -66,7 +66,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public function processProducerJob(string $producerGroup)
     {
-        $courseTree = $this->studyGuideConnectionService->getCourseTree($producerGroup, StageConstants::STAGE_PUBLISHED);
+        $courseTree = $this->studyGuideConnectionService->getCourseTree($producerGroup, StageConstants::STAGE_PUBLISHED, false);
 
         // course landing view
         $props = self::getProps($courseTree, $courseTree);
