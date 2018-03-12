@@ -99,7 +99,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
                 $jobHandler->processNewBuildJob($body['builtAt'], $body['commitHash']);
                 break;
             case 'producer-job':
-                $jobHandler->processProducerJob($body['producerGroup']);
+                $jobHandler->processProducerJob($body['producerGroup'], $body);
                 break;
             case 'render-job':
                 // Don't use jms deserializer here because the code that creates render-jobs uses the jms serializer. So, the data is in the exact structure we want already
