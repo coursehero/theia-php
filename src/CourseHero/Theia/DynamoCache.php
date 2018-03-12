@@ -88,7 +88,7 @@ class DynamoCache implements CachingInterface
                     'html' => ['S' => $renderResult->getHtml()],
                     'assets' => ['S' => json_encode($renderResult->getAssets())],
                     'componentLibrary' => ['S' => $componentLibrary],
-                    'expirationDate' => ['S' => time() + $secondsUntilExpires],
+                    'expirationDate' => ['N' => time() + $secondsUntilExpires],
                 ],
             ]
         );
