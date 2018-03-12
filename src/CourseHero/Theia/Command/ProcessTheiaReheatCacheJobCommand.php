@@ -62,16 +62,14 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
             if (!$message) {
                 return; // if no more messages just return and restart for now
             }
-            // Delete message from queue so long jobs don't get processed multiple times
-            $deleteSuccess = $this->queue->deleteMessage($message);
 
             $this->write("Job processing started");
             $this->processJob($message);
             $this->write("Finished job\n");
+
+            // relying on dead letter queue + long visibility timeout to avoid double-processing jobs / reprocessing err'd jobs
+            $this->queue->deleteMessage($message);
         } catch (\Exception $e) {
-            if (isset($message) && $deleteSuccess) {
-                $this->queue->sendMessage($message);
-            }
             $this->write("Job failed {$e->getMessage()}");
             $this->sendSlackMessage("Exception: {$e->getMessage()}");
         }
