@@ -19,16 +19,12 @@ class DynamoCache implements CachingInterface
     /** @var DynamoDbClient */
     protected $dynamoClient;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $theiaCacheTable;
-
 
     protected $amazonS3Key;
     protected $amazonS3Secret;
     protected $amazonS3Region;
-
 
     /**
      * @param string $amazonS3Key
@@ -42,7 +38,7 @@ class DynamoCache implements CachingInterface
         $this->amazonS3Secret = $amazonS3Secret;
         $this->amazonS3Region = $amazonS3Region;
         $this->theiaCacheTable = $theiaCacheTable;
-        
+
         /** @var DynamoDbClient $client */
         $this->dynamoClient = DynamoDbClient::factory(
             [
@@ -58,28 +54,20 @@ class DynamoCache implements CachingInterface
      */
     public function get(string $key)
     {
-        $response = $this->dynamoClient->query(
+        $response = $this->dynamoClient->getItem(
             [
-                'KeyConditions' => [
-                    'key' => [
-                        'ComparisonOperator' => 'EQ',
-                        'AttributeValueList' => [
-                            ['S' => $key],
-                        ],
-                    ]],
+                'Key' => [
+                    'key' => ['S' => $key],
+                ],
                 'TableName' => $this->theiaCacheTable
             ]
         );
 
-        $items = $response['Items'];
+        $item = $response['Item'];
 
-        if ($items) {
-            $html = '';
-            $assets = [];
-            foreach ($items as $item) {
-                $html = $item['html']['S'];
-                $assets = $item['assets']['S'];
-            }
+        if ($item) {
+            $html = $item['html']['S'];
+            $assets = $item['assets']['S'];
 
             return new RenderResult($html, json_decode($assets, true));
         }
@@ -90,7 +78,7 @@ class DynamoCache implements CachingInterface
     /**
      * @inheritDoc
      */
-    public function set(string $componentLibrary, string $component, string $key, RenderResult $renderResult)
+    public function set(string $componentLibrary, string $component, string $key, RenderResult $renderResult, int $secondsUntilExpires)
     {
         $response = $this->dynamoClient->putItem(
             [
@@ -99,7 +87,8 @@ class DynamoCache implements CachingInterface
                     'key' => ['S' => $key],
                     'html' => ['S' => $renderResult->getHtml()],
                     'assets' => ['S' => json_encode($renderResult->getAssets())],
-                    'componentLibrary' => ['S' => $componentLibrary]
+                    'componentLibrary' => ['S' => $componentLibrary],
+                    'expirationDate' => ['N' => time() + $secondsUntilExpires],
                 ],
             ]
         );
