@@ -19,6 +19,7 @@ interface CachingInterface
      * @param string $component
      * @param string $key
      * @param RenderResult $renderResult
+     * @param int $secondsUntilExpires
      */
-    public function set(string $componentLibrary, string $component, string $key, RenderResult $renderResult);
+    public function set(string $componentLibrary, string $component, string $key, RenderResult $renderResult, int $secondsUntilExpires);
 }
