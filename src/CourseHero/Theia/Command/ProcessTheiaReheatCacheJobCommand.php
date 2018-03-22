@@ -133,7 +133,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     protected function getSlackChannelName(): string
     {
         $environment = $this->getContainer()->getParameter('environment');
-        return 'production' === $environment ? '#theia-errors-prod' : '#theia-errors-dev';
+        return 'production' === $environment ? '#theia-prod' : '#theia-dev';
     }
 
     protected function getQueueService(): QueueService
