@@ -9,7 +9,6 @@ use CourseHero\QueueBundle\Service\QueueService;
 use CourseHero\StudyGuideBundle\Service\StudyGuideConnectionService;
 use CourseHero\TheiaBundle\Service\TheiaProviderService;
 use CourseHero\UtilsBundle\Command\AbstractPerpetualCommand;
-use CourseHero\UtilsBundle\Service\SlackMessengerService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -71,7 +70,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
             $this->queue->deleteMessage($message);
         } catch (\Exception $e) {
             $this->write("Job failed {$e->getMessage()}");
-            $this->sendSlackMessage("Exception: {$e->getMessage()}");
+            $this->getTheiaProviderService()->sendSlackMessage("Exception: {$e->getMessage()}");
         }
     }
 
@@ -123,19 +122,6 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
         return 'production' === $environment ? Queue::THEIA_REHEAT_JOBS : Queue::THEIA_REHEAT_JOBS_DEV;
     }
 
-    protected function sendSlackMessage(string $text)
-    {
-        if ($this->getContainer()->getParameter('environment') !== 'localhost') {
-            $this->getSlackMessengerService()->send($text, $this->getSlackChannelName(), 'IRIS', ':eye:');
-        }
-    }
-
-    protected function getSlackChannelName(): string
-    {
-        $environment = $this->getContainer()->getParameter('environment');
-        return 'production' === $environment ? '#theia-prod' : '#theia-dev';
-    }
-
     protected function getQueueService(): QueueService
     {
         return $this->getContainer()->get(QueueService::SERVICE_ID);
@@ -149,10 +135,5 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
     protected function getTheiaProviderService(): TheiaProviderService
     {
         return $this->getContainer()->get(TheiaProviderService::SERVICE_ID);
-    }
-
-    protected function getSlackMessengerService(): SlackMessengerService
-    {
-        return $this->getContainer()->get(SlackMessengerService::SERVICE_ID);
     }
 }

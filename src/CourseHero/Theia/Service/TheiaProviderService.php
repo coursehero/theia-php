@@ -4,6 +4,7 @@ namespace CourseHero\TheiaBundle\Service;
 
 use CourseHero\TheiaBundle\DynamoCache;
 use CourseHero\UtilsBundle\Service\AbstractCourseHeroService;
+use CourseHero\UtilsBundle\Service\SlackMessengerService;
 use JMS\DiExtraBundle\Annotation\Inject;
 use JMS\DiExtraBundle\Annotation\InjectParams;
 use JMS\DiExtraBundle\Annotation\Service;
@@ -34,14 +35,22 @@ class TheiaProviderService extends AbstractCourseHeroService
     /** @var string */
     protected $amazonS3Region;
 
+    /** @var string */
+    protected $environment;
+
+    /** @var SlackMessengerService */
+    protected $slackMessengerService;
+
     /**
      * @InjectParams({
-     *     "endpoint"   = @Inject("%theia.endpoint%"),
-     *     "authKey"    = @Inject("%ch_internal.apiKey%"),
-     *     "amazonS3Key"    = @Inject("%amazon_s3.key%"),
-     *     "amazonS3Secret" = @Inject("%amazon_s3.secret%"),
-     *     "amazonS3Region" = @Inject("%amazon_s3.region%"),
-     *     "theiaCacheTable"= @Inject("%theia.cache_table%"),
+     *     "endpoint"        = @Inject("%theia.endpoint%"),
+     *     "authKey"         = @Inject("%ch_internal.apiKey%"),
+     *     "amazonS3Key"     = @Inject("%amazon_s3.key%"),
+     *     "amazonS3Secret"  = @Inject("%amazon_s3.secret%"),
+     *     "amazonS3Region"  = @Inject("%amazon_s3.region%"),
+     *     "theiaCacheTable" = @Inject("%theia.cache_table%"),
+     *     "environment"     = @Inject("%environment%"),
+     *     "slackMessengerService" = @Inject(SlackMessengerService::SERVICE_ID),
      * })
      *
      * @param string $endpoint
@@ -50,6 +59,8 @@ class TheiaProviderService extends AbstractCourseHeroService
      * @param string $amazonS3Secret
      * @param string $amazonS3Region
      * @param string $theiaCacheTable
+     * @param string $environment
+     * @param SlackMessengerService $slackMessengerService
      */
     public function inject(
         string $endpoint,
@@ -57,7 +68,9 @@ class TheiaProviderService extends AbstractCourseHeroService
         string $amazonS3Key,
         string $amazonS3Secret,
         string $amazonS3Region,
-        string $theiaCacheTable
+        string $theiaCacheTable,
+        string $environment,
+        SlackMessengerService $slackMessengerService
     ) {
         $this->endpoint = $endpoint;
         $this->authKey = $authKey;
@@ -65,6 +78,8 @@ class TheiaProviderService extends AbstractCourseHeroService
         $this->amazonS3Secret = $amazonS3Secret;
         $this->amazonS3Region = $amazonS3Region;
         $this->theiaCacheTable = $theiaCacheTable;
+        $this->environment = $environment;
+        $this->slackMessengerService = $slackMessengerService;
     }
 
     /**
@@ -81,5 +96,17 @@ class TheiaProviderService extends AbstractCourseHeroService
                 'CH-Auth' => $this->authKey,
             ]
         );
+    }
+
+    public function sendSlackMessage(string $text)
+    {
+        if ($this->environment !== 'localhost') {
+            $this->slackMessengerService->send($text, $this->getSlackChannelName(), 'IRIS', ':eye:');
+        }
+    }
+
+    protected function getSlackChannelName(): string
+    {
+        return $this->environment === 'production' ? '#theia-prod' : '#theia-dev';
     }
 }

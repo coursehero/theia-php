@@ -79,5 +79,8 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
                 $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
             }
         }
+
+        // This is important for when a course is republished. It has no effect when a new build job created this producer job
+        $this->studyGuideConnectionService->setCacheForCourse($courseTree);
     }
 }
