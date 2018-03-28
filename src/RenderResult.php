@@ -14,6 +14,9 @@ class RenderResult
     /** @var array */
     private $assets;
 
+    /** @var bool */
+    private $retrievedFromCache;
+
     /**
      * RenderResult constructor.
      * @param string $html
@@ -39,5 +42,21 @@ class RenderResult
     public function getAssets(): array
     {
         return $this->assets;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRetrievedFromCache(): bool
+    {
+        return $this->retrievedFromCache;
+    }
+
+    /**
+     * @param bool $retrievedFromCache
+     */
+    public function setRetrievedFromCache(bool $retrievedFromCache)
+    {
+        $this->retrievedFromCache = $retrievedFromCache;
     }
 }

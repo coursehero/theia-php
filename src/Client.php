@@ -90,12 +90,14 @@ class Client {
         if (!$force) {
             $cachedRenderResult = $this->cachingInterface->get($key);
             if ($cachedRenderResult) {
+                $cachedRenderResult->setRetrievedFromCache(true);
                 return $cachedRenderResult;
             }
         }
 
         $renderResult = $this->render($componentLibrary, $component, $propsAsString);
         $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult, $secondsUntilExpires);
+        $renderResult->setRetrievedFromCache(false);
 
         return $renderResult;
     }
