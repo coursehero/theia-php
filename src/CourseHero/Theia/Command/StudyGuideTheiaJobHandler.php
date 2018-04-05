@@ -56,7 +56,14 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
         /** @var CourseBlock $courseBlock */
         foreach ($courseBlocks as $courseBlock) {
-            $this->createProducerJob($courseBlock->getName());
+            // TODO: kevin wants to not do this
+            /*
+                /sg/intro-to-bio/ => intro-to-bio
+            */
+            $slug = $courseBlock->getName();
+            $slug = rtrim($slug, '/');
+            $slug = ltrim($slug, '/sg/');
+            $this->createProducerJob($slug);
         }
     }
 
