@@ -25,9 +25,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         $jmsSerializer = SerializerBuilder::create()->build();
         return $jmsSerializer->serialize([
             "course" => $courseBlock,
-            "blockToRenderId" => $blockToRender->getBlockType() == CourseBlock::BLOCK_TYPE ? $blockToRender->getId() : 0, // TODO: remove
-            "route" => $blockToRender->getRoute(),
-            "location" => $blockToRender->getRoute()
+            "route" => $blockToRender->getRoute()
         ], 'json');
     }
 
