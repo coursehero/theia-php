@@ -60,7 +60,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
             /*
                 /sg/intro-to-bio/ => intro-to-bio
             */
-            $slug = $courseBlock->getName();
+            $slug = $courseBlock->getRoute();
             $slug = rtrim($slug, '/');
             $slug = ltrim($slug, '/sg/');
             $this->createProducerJob($slug);
