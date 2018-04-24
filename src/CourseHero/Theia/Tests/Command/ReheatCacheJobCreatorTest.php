@@ -22,7 +22,7 @@ class ReheatCacheJobCreatorTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateProducerJob()
     {
-        $this->jobCreator->createProducerJob('componentLibrary', 'producerGroup');
+        $this->jobCreator->createProducerJob('componentLibrary', 'producerGroup', []);
         $msg = $this->queue->receiveMessage();
         $this->assertSame('producer-job', $msg->getAttributes()['Type']['StringValue']);
         $this->assertSame('componentLibrary', $msg->getAttributes()['ComponentLibrary']['StringValue']);
