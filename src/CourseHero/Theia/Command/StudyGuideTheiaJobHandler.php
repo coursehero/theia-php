@@ -15,6 +15,9 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 {
     public static $componentLibrary = '@coursehero-components/study-guides';
 
+    /** @var array */
+    protected $courseTrees = [];
+
     /**
      * @param CourseBlock $courseBlock
      * @param Block $blockToRender
@@ -27,6 +30,22 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
             "course" => $courseBlock,
             "route" => $blockToRender->getRoute()
         ], 'json');
+    }
+
+    /**
+     * @param CourseBlock $courseBlock
+     * @param string $urlPath
+     * @return Block
+     */
+    public static function findMatchingBlock(CourseBlock $courseBlock, string $route): Block
+    {
+        foreach ($courseBlock->createIterator() as $block) {
+            if ($block->getRoute() === $route) {
+                return $block;
+            }
+        }
+
+        throw new NotFoundHttpException("Study Guide for route $route does not exist");
     }
 
     /** @var StudyGuideConnectionService */
@@ -69,25 +88,63 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
     /**
      * @param string $producerGroup
+     * @param array $jobParams
      * @throws \Exception
      */
-    public function processProducerJob(string $producerGroup)
+    public function processProducerJob(string $producerGroup, array $jobParams)
     {
-        $courseTree = $this->studyGuideConnectionService->getCourseTree($producerGroup, StageConstants::STAGE_PUBLISHED, false);
+        $courseSlug = $producerGroup;
+        $courseTree = $this->getCourseTree($courseSlug);
 
+        $route = $jobParams['route'] ?? null;
+        if ($route) {
+            $this->processRouteProducerJob($courseTree, $route);
+        } else {
+            $this->processCourseProducerJob($courseTree);
+        }
+    }
+
+    /**
+     * Grabs a course and adds it to our local course tree cache
+     */
+    protected function getCourseTree(string $courseSlug): CourseBlock
+    {
+        if (!isset($this->courseTrees[$courseSlug])) {
+            $this->courseTrees[$courseSlug] = $this->studyGuideConnectionService->getCourseTree($courseSlug, StageConstants::STAGE_PUBLISHED, false);
+        }
+        return $this->courseTrees[$courseSlug];
+    }
+
+    /**
+     * queues a producer job for a specific block
+     */
+    protected function createRouteProducerJob(string $producerGroup, Block $block)
+    {
+        $this->createProducerJob($producerGroup, [
+            'route' => $block->getRoute()
+        ]);
+    }
+
+    protected function processCourseProducerJob(string $producerGroup, CourseBlock $courseTree)
+    {
         // course landing view
-        $props = self::getProps($courseTree, $courseTree);
-        $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
+        $this->createRouteProducerJob($producerGroup, $courseTree);
 
         /** @var Block $block */
         foreach ($courseTree->createIterator() as $block) {
             if (in_array($block->getBlockType(), [SectionBlock::BLOCK_TYPE, SubtopicBlock::BLOCK_TYPE])) {
-                $props = self::getProps($courseTree, $block);
-                $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
+                $this->createRouteProducerJob($producerGroup, $block);
             }
         }
 
         // This is important for when a course is republished. It has no effect when a new build job created this producer job
         $this->studyGuideConnectionService->setCacheForCourse($courseTree);
+    }
+
+    protected function processRouteProducerJob(CourseBlock $courseTree, string $route)
+    {
+        $block = self::findMatchingBlock($route);
+        $props = self::getProps($courseTree, $block);
+        $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
     }
 }

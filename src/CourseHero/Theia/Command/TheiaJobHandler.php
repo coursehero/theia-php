@@ -21,11 +21,12 @@ abstract class TheiaJobHandler
 
     /**
      * @param string $producerGroup
+     * @param array $jobParams
      * @throws \Exception
      */
-    protected function createProducerJob(string $producerGroup)
+    protected function createProducerJob(string $producerGroup, array $jobParams)
     {
-        $this->jobCreator->createProducerJob(static::$componentLibrary, $producerGroup);
+        $this->jobCreator->createProducerJob(static::$componentLibrary, $producerGroup, $jobParams);
     }
 
     /**
@@ -40,5 +41,5 @@ abstract class TheiaJobHandler
 
     abstract public function processNewBuildJob(string $builtAt, string $commitHash);
 
-    abstract public function processProducerJob(string $producerGroup);
+    abstract public function processProducerJob(string $producerGroup, array $producerParams);
 }
