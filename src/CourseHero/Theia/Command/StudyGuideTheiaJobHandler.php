@@ -82,7 +82,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
             $slug = $courseBlock->getRoute();
             $slug = rtrim($slug, '/');
             $slug = ltrim($slug, '/sg/');
-            $this->createProducerJob($slug);
+            $this->createProducerJob($slug, []);
         }
     }
 
