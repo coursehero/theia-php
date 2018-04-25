@@ -87,20 +87,19 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     }
 
     /**
-     * @param string $producerGroup
+     * @param string $producerGroup - courseSlug
      * @param array $jobParams
      * @throws \Exception
      */
     public function processProducerJob(string $producerGroup, array $jobParams)
     {
-        $courseSlug = $producerGroup;
-        $courseTree = $this->getCourseTree($courseSlug);
+        $courseTree = $this->getCourseTree($producerGroup);
 
         $route = $jobParams['route'] ?? null;
         if ($route) {
             $this->processRouteProducerJob($courseTree, $route);
         } else {
-            $this->processCourseProducerJob($courseTree);
+            $this->processCourseProducerJob($producerGroup, $courseTree);
         }
     }
 
