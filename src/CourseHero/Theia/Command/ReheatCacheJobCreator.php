@@ -20,12 +20,12 @@ class ReheatCacheJobCreator
      * @param array $jobParams
      * @throws \Exception
      */
-    public function createProducerJob(string $componentLibrary, string $producerGroup, array $jobParams)
+    public function createProducerJob(string $componentLibrary, string $producerGroup, array $jobParams = [])
     {
         $message = $this->queue->createMessage([
-                'producerGroup' => $producerGroup,
-                'jobParams' => $jobParams,
-            ]);
+            'producerGroup' => $producerGroup,
+            'jobParams' => $jobParams,
+        ]);
         $message->setAttributes(
             [
                 'Type' => [
