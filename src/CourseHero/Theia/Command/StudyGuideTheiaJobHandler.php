@@ -142,7 +142,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
     protected function processRouteProducerJob(CourseBlock $courseTree, string $route)
     {
-        $block = self::findMatchingBlock($route);
+        $block = self::findMatchingBlock($courseTree, $route);
         $props = self::getProps($courseTree, $block);
         $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
     }
