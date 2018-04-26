@@ -93,24 +93,22 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public function processProducerJob(string $producerGroup, array $jobParams)
     {
-        $courseTree = $this->getCourseTree($producerGroup);
-
-        $route = $jobParams['route'] ?? null;
-        if ($route) {
-            $this->processRouteProducerJob($courseTree, $route);
+        if (isset($jobParams['route'])) {
+            $this->processRouteProducerJob($producerGroup, $jobParams);
         } else {
-            $this->processCourseProducerJob($producerGroup, $courseTree);
+            $this->processCourseProducerJob($producerGroup);
         }
     }
 
     /**
      * Grabs a course and adds it to our local course tree cache
      */
-    protected function getCourseTree(string $courseSlug): CourseBlock
+    protected function getCourseTree(string $courseSlug, bool $force = false): CourseBlock
     {
-        if (!isset($this->courseTrees[$courseSlug])) {
+        if ($force || !isset($this->courseTrees[$courseSlug])) {
             $this->courseTrees[$courseSlug] = $this->studyGuideConnectionService->getCourseTree($courseSlug, StageConstants::STAGE_PUBLISHED, false);
         }
+
         return $this->courseTrees[$courseSlug];
     }
 
@@ -124,8 +122,10 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         ]);
     }
 
-    protected function processCourseProducerJob(string $producerGroup, CourseBlock $courseTree)
+    protected function processCourseProducerJob(string $producerGroup)
     {
+        $courseTree = $this->getCourseTree($producerGroup, true);
+
         // course landing view
         $this->createRouteProducerJob($producerGroup, $courseTree);
 
@@ -140,9 +140,10 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         $this->studyGuideConnectionService->setCacheForCourse($courseTree);
     }
 
-    protected function processRouteProducerJob(CourseBlock $courseTree, string $route)
+    protected function processRouteProducerJob(string $producerGroup, array $jobParams)
     {
-        $block = self::findMatchingBlock($courseTree, $route);
+        $courseTree = $this->getCourseTree($producerGroup);
+        $block = self::findMatchingBlock($courseTree, $jobParams['route']);
         $props = self::getProps($courseTree, $block);
         $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
     }
