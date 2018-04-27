@@ -104,16 +104,11 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
                 // Don't use jms deserializer here because the code that creates render-jobs uses the jms serializer. So, the data is in the exact structure we want already
                 $props = $body;
                 $component = $attrs['Component']['StringValue'];
-                $this->processRenderJob($componentLibrary, $component, $props);
+                $jobHandler->processRenderJob($component, $props);
                 break;
             default:
                 throw new \Exception("unexpected job type: $type");
         }
-    }
-
-    protected function processRenderJob(string $componentLibrary, string $component, string $props)
-    {
-        $this->theiaClient->renderAndCache($componentLibrary, $component, $props, true);
     }
 
     protected function getQueueName(): string

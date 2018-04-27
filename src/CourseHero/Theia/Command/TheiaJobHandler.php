@@ -42,4 +42,14 @@ abstract class TheiaJobHandler
     abstract public function processNewBuildJob(string $builtAt, string $commitHash);
 
     abstract public function processProducerJob(string $producerGroup, array $producerParams);
+
+    /**
+     * @param string $component
+     * @param string $props
+     * @throws \Exception
+     */
+    public function processRenderJob(string $component, string $props)
+    {
+        $this->theiaClient->renderAndCache(static::$componentLibrary, $component, $props, true);
+    }
 }

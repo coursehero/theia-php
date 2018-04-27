@@ -93,11 +93,20 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public function processProducerJob(string $producerGroup, array $jobParams)
     {
-        if (isset($jobParams['route'])) {
-            $this->processRouteProducerJob($producerGroup, $jobParams);
-        } else {
-            $this->processCourseProducerJob($producerGroup);
+        $courseTree = $this->getCourseTree($producerGroup, true);
+
+        // course landing view
+        $this->createRenderJob('CourseApp', $courseTree->getRoute());
+
+        /** @var Block $block */
+        foreach ($courseTree->createIterator() as $block) {
+            if (in_array($block->getBlockType(), [SectionBlock::BLOCK_TYPE, SubtopicBlock::BLOCK_TYPE])) {
+                $this->createRenderJob('CourseApp', $block->getRoute());
+            }
         }
+
+        // This is important for when a course is republished. It has no effect when a new build job created this producer job
+        $this->studyGuideConnectionService->setCacheForCourse($courseTree);
     }
 
     /**
@@ -112,39 +121,13 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         return $this->courseTrees[$courseSlug];
     }
 
-    /**
-     * queues a producer job for a specific block
-     */
-    protected function createRouteProducerJob(string $producerGroup, Block $block)
+    // The props needed are too big to store in an SQS message, so we override the render job
+    // and provide the props from an in-memory cache. "props" is really the route to render
+    public function processRenderJob(string $component, string $props)
     {
-        $this->createProducerJob($producerGroup, [
-            'route' => $block->getRoute()
-        ]);
-    }
-
-    protected function processCourseProducerJob(string $producerGroup)
-    {
-        $courseTree = $this->getCourseTree($producerGroup, true);
-
-        // course landing view
-        $this->createRouteProducerJob($producerGroup, $courseTree);
-
-        /** @var Block $block */
-        foreach ($courseTree->createIterator() as $block) {
-            if (in_array($block->getBlockType(), [SectionBlock::BLOCK_TYPE, SubtopicBlock::BLOCK_TYPE])) {
-                $this->createRouteProducerJob($producerGroup, $block);
-            }
-        }
-
-        // This is important for when a course is republished. It has no effect when a new build job created this producer job
-        $this->studyGuideConnectionService->setCacheForCourse($courseTree);
-    }
-
-    protected function processRouteProducerJob(string $producerGroup, array $jobParams)
-    {
-        $courseTree = $this->getCourseTree($producerGroup);
-        $block = self::findMatchingBlock($courseTree, $jobParams['route']);
-        $props = self::getProps($courseTree, $block);
-        $this->theiaClient->renderAndCache(self::$componentLibrary, 'CourseApp', $props, true);
+        $route = $props;
+        $courseTree = $this->getCourseTree($route);
+        $block = self::findMatchingBlock($courseTree, $route);
+        parent::processRenderJob('CourseApp', self::getProps($courseTree, $block));
     }
 }
