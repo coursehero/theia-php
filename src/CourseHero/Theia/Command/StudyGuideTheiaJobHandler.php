@@ -96,12 +96,12 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         $courseTree = $this->getCourseTree($producerGroup, true);
 
         // course landing view
-        $this->createRenderJob('CourseApp', $courseTree->getRoute());
+        $this->createCustomRenderJob('CourseApp', $producerGroup, $courseTree);
 
         /** @var Block $block */
         foreach ($courseTree->createIterator() as $block) {
             if (in_array($block->getBlockType(), [SectionBlock::BLOCK_TYPE, SubtopicBlock::BLOCK_TYPE])) {
-                $this->createRenderJob('CourseApp', $block->getRoute());
+                $this->createCustomRenderJob('CourseApp', $producerGroup, $block);
             }
         }
 
@@ -121,12 +121,24 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
         return $this->courseTrees[$courseSlug];
     }
 
+    protected function createCustomRenderJob(string $component, string $courseSlug, Block $block)
+    {
+        $data = json_encode([
+            'courseSlug' => $producerGroup,
+            'route' => $courseTree->getRoute()
+        ]);
+        $this->createRenderJob($component, $data);
+    }
+
     // The props needed are too big to store in an SQS message, so we override the render job
-    // and provide the props from an in-memory cache. "props" is really the route to render
+    // and provide the props from an in-memory cache
     public function processRenderJob(string $component, string $props)
     {
-        $route = $props;
-        $courseTree = $this->getCourseTree($route);
+        $data = json_decode($props);
+        $courseSlug = $data['courseSlug'];
+        $route = $data['route'];
+
+        $courseTree = $this->getCourseTree($courseSlug);
         $block = self::findMatchingBlock($courseTree, $route);
         parent::processRenderJob('CourseApp', self::getProps($courseTree, $block));
     }
