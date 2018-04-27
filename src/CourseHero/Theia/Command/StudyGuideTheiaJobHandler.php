@@ -124,8 +124,8 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     protected function createCustomRenderJob(string $component, string $courseSlug, Block $block)
     {
         $data = json_encode([
-            'courseSlug' => $producerGroup,
-            'route' => $courseTree->getRoute()
+            'courseSlug' => $courseSlug,
+            'route' => $block->getRoute()
         ]);
         $this->createRenderJob($component, $data);
     }
