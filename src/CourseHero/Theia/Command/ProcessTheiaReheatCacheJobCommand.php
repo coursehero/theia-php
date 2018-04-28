@@ -68,7 +68,7 @@ class ProcessTheiaReheatCacheJobCommand extends AbstractPerpetualCommand
 
             // relying on dead letter queue + long visibility timeout to avoid double-processing jobs / reprocessing err'd jobs
             $this->queue->deleteMessage($message);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->write("Job failed {$e->getMessage()}");
             $this->getTheiaProviderService()->sendSlackMessage("Caught error: {$e->getMessage()}");
         }
