@@ -134,9 +134,8 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     // and provide the props from an in-memory cache
     public function processRenderJob(string $component, string $props)
     {
-        $data = json_decode($props, true);
-        
-        if (isset($data['courseSlug'])) {
+        if ($component == 'CourseApp') {
+            $data = json_decode($props, true);
             $courseSlug = $data['courseSlug'];
             $route = $data['route'];
 
