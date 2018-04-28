@@ -141,10 +141,10 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
             $courseTree = $this->getCourseTree($courseSlug);
             $block = self::findMatchingBlock($courseTree, $route);
-            parent::processRenderJob('CourseApp', self::getProps($courseTree, $block));
+            parent::processRenderJob($component, self::getProps($courseTree, $block));
         } else {
             // only index-app does this
-            parent::processRenderJob('CourseApp', $props);
+            parent::processRenderJob($component, $props);
         }
     }
 }
