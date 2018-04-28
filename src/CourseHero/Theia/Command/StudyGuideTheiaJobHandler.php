@@ -135,11 +135,17 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     public function processRenderJob(string $component, string $props)
     {
         $data = json_decode($props, true);
-        $courseSlug = $data['courseSlug'];
-        $route = $data['route'];
+        
+        if (isset($data['courseSlug'])) {
+            $courseSlug = $data['courseSlug'];
+            $route = $data['route'];
 
-        $courseTree = $this->getCourseTree($courseSlug);
-        $block = self::findMatchingBlock($courseTree, $route);
-        parent::processRenderJob('CourseApp', self::getProps($courseTree, $block));
+            $courseTree = $this->getCourseTree($courseSlug);
+            $block = self::findMatchingBlock($courseTree, $route);
+            parent::processRenderJob('CourseApp', self::getProps($courseTree, $block));
+        } else {
+            // only index-app does this
+            parent::processRenderJob('CourseApp', $props);
+        }
     }
 }
