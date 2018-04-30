@@ -10,6 +10,7 @@ use StudyGuideBlocks\Blocks\Block;
 use StudyGuideBlocks\Blocks\CourseBlock;
 use StudyGuideBlocks\Blocks\SectionBlock;
 use StudyGuideBlocks\Blocks\SubtopicBlock;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StudyGuideTheiaJobHandler extends TheiaJobHandler
 {
