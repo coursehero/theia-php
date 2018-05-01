@@ -46,9 +46,9 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
     /** @var StudyGuideConnectionService */
     private $studyGuideConnectionService;
 
-    public function __construct(\Theia\Client $theiaClient, StudyGuideConnectionService $studyGuideConnectionService)
+    public function __construct(\Theia\Client $theiaClient, ReheatCacheJobCreator $jobCreator, StudyGuideConnectionService $studyGuideConnectionService)
     {
-        parent::__construct($theiaClient);
+        parent::__construct($theiaClient, $jobCreator);
         $this->studyGuideConnectionService = $studyGuideConnectionService;
     }
 
