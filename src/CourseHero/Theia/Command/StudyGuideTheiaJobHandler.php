@@ -5,7 +5,6 @@ namespace CourseHero\TheiaBundle\Command;
 use CourseHero\StudyGuideBundle\Constants\StageConstants;
 use CourseHero\StudyGuideBundle\Service\StudyGuideConnectionService;
 use JMS\Serializer\SerializerBuilder;
-use JMS\SerializerBundle\JMSSerializerBundle;
 use StudyGuideBlocks\Blocks\Block;
 use StudyGuideBlocks\Blocks\CourseBlock;
 use StudyGuideBlocks\Blocks\SectionBlock;
@@ -26,6 +25,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public static function getProps(CourseBlock $courseBlock, Block $blockToRender)
     {
+        // TODO this is causing the body to be serialized twice, because it will be serialized again when the message is sent
         $jmsSerializer = SerializerBuilder::create()->build();
         return $jmsSerializer->serialize([
             "course" => $courseBlock,
@@ -48,18 +48,28 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
         throw new NotFoundHttpException("Study Guide for route $route does not exist");
     }
+    
+    /*
+     * @param array $courses
+     * @param int $numLitTitles
+     * @return string
+     */
+    public static function getIndexProps(array $courses, int $numLitTitles)
+    {
+        $jmsSerializer = SerializerBuilder::create()->build();
+        return $jmsSerializer->serialize([
+            'courses' => $courses,
+            'numLitTitles' => $numLitTitles,
+        ], 'json');
+    }
 
     /** @var StudyGuideConnectionService */
     private $studyGuideConnectionService;
-
-    /** @var JMSSerializerBundle */
-    private $jmsSerializer;
 
     public function __construct(\Theia\Client $theiaClient, ReheatCacheJobCreator $jobCreator, StudyGuideConnectionService $studyGuideConnectionService)
     {
         parent::__construct($theiaClient, $jobCreator);
         $this->studyGuideConnectionService = $studyGuideConnectionService;
-        $this->jmsSerializer = SerializerBuilder::create()->build();
     }
 
     /**
@@ -69,13 +79,10 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
      */
     public function processNewBuildJob(string $builtAt, string $commitHash)
     {
-        $courseBlocks = $this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED, false);
-        // TODO this is causing the body to be serialized twice, because it will be serialized again when the message is sent
-        // TODO commented out b/c we currently do not even use IndexApp
-        // $this->createRenderJob('IndexApp', $this->jmsSerializer->serialize(['courses' => $courseBlocks], 'json'));
+        $this->studyGuideConnectionService->reheatIndexPage();
 
         /** @var CourseBlock $courseBlock */
-        foreach ($courseBlocks as $courseBlock) {
+        foreach ($this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED, false) as $courseBlock) {
             // TODO: kevin wants to not do this
             /*
                 /sg/intro-to-bio/ => intro-to-bio
@@ -83,7 +90,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
             $slug = $courseBlock->getRoute();
             $slug = rtrim($slug, '/');
             $slug = ltrim($slug, '/sg/');
-            $this->createProducerJob($slug, []);
+            $this->studyGuideConnectionService->reheatCacheForCourse($slug);
         }
     }
 
