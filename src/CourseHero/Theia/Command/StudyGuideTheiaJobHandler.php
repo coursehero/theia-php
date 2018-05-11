@@ -48,7 +48,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
         throw new NotFoundHttpException("Study Guide for route $route does not exist");
     }
-    
+
     /*
      * @param array $courses
      * @param int $numLitTitles
@@ -83,14 +83,7 @@ class StudyGuideTheiaJobHandler extends TheiaJobHandler
 
         /** @var CourseBlock $courseBlock */
         foreach ($this->studyGuideConnectionService->getCoursesTree(StageConstants::STAGE_PUBLISHED, false) as $courseBlock) {
-            // TODO: kevin wants to not do this
-            /*
-                /sg/intro-to-bio/ => intro-to-bio
-            */
-            $slug = $courseBlock->getRoute();
-            $slug = rtrim($slug, '/');
-            $slug = ltrim($slug, '/sg/');
-            $this->studyGuideConnectionService->reheatCacheForCourse($slug);
+            $this->studyGuideConnectionService->reheatCacheForCourse($courseBlock->getCourseSlug());
         }
     }
 
