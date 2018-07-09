@@ -1,6 +1,6 @@
 <?php
 
-namespace Theia;
+namespace CourseHero\Theia;
 
 /**
  * Interface CachingInterface
