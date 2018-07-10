@@ -2,7 +2,7 @@
 
 namespace CourseHero\Theia\ReheatCache;
 
-abstract class TheiaJobHandler
+abstract class JobHandler
 {
     /** @var JobProcessor */
     protected $processor;
@@ -45,7 +45,7 @@ abstract class TheiaJobHandler
         $data->componentLibrary = $this->componentLibrary;
         $data->producerGroup = $producerGroup;
         $data->extra = $extra;
-        $this->process->getJobCreator()->createProducerJob($data);
+        $this->processor->getJobCreator()->createProducerJob($data);
     }
 
     /**
@@ -59,6 +59,6 @@ abstract class TheiaJobHandler
         $data->componentLibrary = $this->componentLibrary;
         $data->component = $component;
         $data->props = $props;
-        $this->process->getJobCreator()->createRenderJob($data);
+        $this->processor->getJobCreator()->createRenderJob($data);
     }
 }

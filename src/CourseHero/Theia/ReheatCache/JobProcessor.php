@@ -2,16 +2,18 @@
 
 namespace CourseHero\Theia\ReheatCache;
 
+use CourseHero\Theia\Client;
+
 class JobProcessor
 {
     /** @var JobCreator */
     protected $creator;
 
-    /** @var \Theia\Client */
+    /** @var Client */
     protected $client;
 
     /** @var array */
-    protected $handlers;
+    protected $handlers = [];
 
     public function __construct(JobCreator $creator, Client $client)
     {
@@ -28,16 +30,9 @@ class JobProcessor
      * @param JobData $data
      * @throws \Exception
      */
-    protected function process(JobData $data)
+    public function process(JobData $data)
     {
         $jobHandler = $this->handlers[$data->componentLibrary];
-
-        // $attrsAsString = json_encode($attrs, JSON_PRETTY_PRINT);
-        // $this->write("Processing $data->type with $attrsAsString");
-        // if ($type !== 'render-job') {
-        //     $bodyAsString = json_encode($body, JSON_PRETTY_PRINT);
-        //     $this->write("Body: $bodyAsString");
-        // }
 
         switch ($data->type) {
             case 'new-build-job':

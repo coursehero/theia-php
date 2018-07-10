@@ -7,7 +7,7 @@ abstract class JobCreator
     /**
      * @param JobData $data
      */
-    public function createJob(JobData $data);
+    abstract public function createJob(JobData $data);
 
     /**
      * @param JobData $data
