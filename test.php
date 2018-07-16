@@ -1,8 +1,8 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'src/Client.php';
-require 'src/CachingInterface.php';
+require 'src/CourseHero/Theia/Client.php';
+require 'src/CourseHero/Theia/CachingInterface.php';
 
 $componentLibrary = '@coursehero-components/mythos';
 $component = 'Greeting';
@@ -10,19 +10,19 @@ $props = [
   'name' => 'Connor Clark',
 ];
 
-class FakeCache implements \Theia\CachingInterface
+class FakeCache implements \CourseHero\Theia\CachingInterface
 {
     public function get(string $key)
     {
         return null;
     }
 
-    public function set(string $componentLibrary, string $component, string $key, \Theia\RenderResult $renderResult)
+    public function set(string $componentLibrary, string $component, string $key, \CourseHero\Theia\RenderResult $renderResult, int $secondsUntilExpires)
     {
     }
 }
 
-$client = new \Theia\Client('localhost:3000', new FakeCache(), [
+$client = new \CourseHero\Theia\Client('localhost:3000', new FakeCache(), [
   'CH-Auth' => 'courseherobatman'
 ]);
 

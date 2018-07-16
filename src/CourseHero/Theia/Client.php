@@ -1,10 +1,10 @@
 <?php
 
-namespace Theia;
+namespace CourseHero\Theia;
 
 /**
  * Class Client
- * @package Theia
+ * @package CourseHero\Theia
  */
 class Client {
     const THIRTY_DAYS = 30 * 24 * 60 * 60;
