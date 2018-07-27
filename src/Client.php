@@ -103,6 +103,36 @@ class Client {
     }
 
     /**
+     * @return array
+     */
+    public function config(): RenderResult {
+        $options = [
+            'headers' => $this->headers
+        ];
+
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post($this->endpoint . '/config', $options);
+        $json = $response->getBody()->getContents();
+        $config = json_decode($json, true);
+        return $config;
+    }
+
+    /**
+     * @return array
+     */
+    public function queues(): RenderResult {
+        $options = [
+            'headers' => $this->headers
+        ];
+
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post($this->endpoint . '/queues', $options);
+        $json = $response->getBody()->getContents();
+        $config = json_decode($json, true);
+        return $config;
+    }
+
+    /**
      * @param array $array
      */
     private function ksortRecursive(&$array)

@@ -14,7 +14,7 @@
   },
   "autoload": {
     "psr-4": {
-      "CourseHero\\": "src/CourseHero/"
+      "CourseHero\\Theia\\": "src/"
     }
   }
 }
