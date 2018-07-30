@@ -126,7 +126,7 @@ class Client {
         ];
 
         $client = new \GuzzleHttp\Client();
-        $response = $client->post($this->endpoint . '/cacheConfig', $options);
+        $response = $client->post($this->endpoint . '/cache-config', $options);
         $json = $response->getBody()->getContents();
         $config = json_decode($json, true);
         return $config;
