@@ -105,7 +105,7 @@ class Client {
     /**
      * @return array
      */
-    public function config(): RenderResult {
+    public function config(): array {
         $options = [
             'headers' => $this->headers
         ];
@@ -120,7 +120,7 @@ class Client {
     /**
      * @return array
      */
-    public function cacheConfig(): RenderResult {
+    public function cacheConfig(): array {
         $options = [
             'headers' => $this->headers
         ];
