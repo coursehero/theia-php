@@ -35,16 +35,17 @@ class Client {
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
+     * @param array? $queryParams
      * @return RenderResult
      */
-    public function render(string $componentLibrary, string $component, $props): RenderResult
+    public function render(string $componentLibrary, string $component, $props, array $queryParams = []): RenderResult
     {
         $options = [
             'headers' => $this->headers,
-            'query' => [
+            'query' => array_merge([
                 'componentLibrary' => $componentLibrary,
                 'component' => $component
-            ]
+            ], $queryParams)
         ];
 
         if (is_array($props)) {
@@ -66,15 +67,16 @@ class Client {
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
+     * @param array $queryParams = []
      * @param bool $force - always render even if key is already in cache
-     * @param int $secondsUntilExpires - Number of seconds until item will expire in
-     *      cache and be removed from the cache.
+     * @param int $secondsUntilExpires - cache ttl
      * @return RenderResult
      */
     public function renderAndCache(
         string $componentLibrary,
         string $component,
         $props,
+        array $queryParams = [],
         bool $force = false,
         int $secondsUntilExpires = self::THIRTY_DAYS
     ): RenderResult {
@@ -95,7 +97,8 @@ class Client {
             }
         }
 
-        $renderResult = $this->render($componentLibrary, $component, $propsAsString);
+        $queryParams['cached'] = true;
+        $renderResult = $this->render($componentLibrary, $component, $propsAsString, $queryParams);
         $this->cachingInterface->set($componentLibrary, $component, $key, $renderResult, $secondsUntilExpires);
         $renderResult->setRetrievedFromCache(false);
 
