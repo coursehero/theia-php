@@ -26,7 +26,7 @@ abstract class JobHandler
      */
     public function processRenderJob(JobData $data)
     {
-        $this->processor->getClient()->renderAndCache($this->componentLibrary, $data->component, $data->props, true);
+        $this->processor->getClient()->renderAndCache($this->componentLibrary, $data->component, $data->props, [], true);
     }
 
     public function getComponentLibrary(): string
