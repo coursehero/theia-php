@@ -3,8 +3,8 @@
 namespace CourseHero\Theia;
 
 /**
- * Interface CachingInterface
- * @package Theia
+ * Interface for caching RenderResults
+ * @package CourseHero\Theia
  */
 interface CachingInterface
 {

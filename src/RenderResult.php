@@ -3,8 +3,8 @@
 namespace CourseHero\Theia;
 
 /**
- * Class RenderResult
- * @package Theia
+ * Theia render response
+ * @package CourseHero\Theia
  */
 class RenderResult
 {

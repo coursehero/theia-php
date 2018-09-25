@@ -1,7 +1,14 @@
 {
-  "name": "theia/theia-php",
-  "description": "Theia PHP client",
+  "name": "coursehero/theia",
+  "description": "Theia PHP Rendering Client",
   "type": "library",
+  "homepage": "https://github.com/coursehero/theia-php",
+  "keywords": [
+    "theia",
+    "react",
+    "server side rendering"
+  ],
+  "license": "Apache-2.0",
   "authors": [
     {
       "name": "Connor Clark",

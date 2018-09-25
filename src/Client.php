@@ -3,7 +3,7 @@
 namespace CourseHero\Theia;
 
 /**
- * Class Client
+ * Rendering client for Theia
  * @package CourseHero\Theia
  */
 class Client {
