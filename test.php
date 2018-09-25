@@ -1,10 +1,10 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'src/CourseHero/Theia/Client.php';
-require 'src/CourseHero/Theia/CachingInterface.php';
+require 'src/Client.php';
+require 'src/CachingInterface.php';
 
-$componentLibrary = '@coursehero-components/mythos';
+$componentLibrary = '@coursehero/mythos';
 $component = 'Greeting';
 $props = [
   'name' => 'Connor Clark',
