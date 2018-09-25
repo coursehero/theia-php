@@ -5,7 +5,7 @@
 ## Installation
 
 ```
-composer require @coursehero/theia
+composer require coursehero/theia
 ```
 
 ## API
