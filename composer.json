@@ -16,5 +16,12 @@
     "psr-4": {
       "CourseHero\\Theia\\": "src/"
     }
+  },
+  "require-dev": {
+    "victorjonsson/markdowndocs": "^1.3"
+  },
+  "scripts": {
+    "test": "php test.php",
+    "build-docs": "phpdoc-md generate src > api.md"
   }
 }

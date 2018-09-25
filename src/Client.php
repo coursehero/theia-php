@@ -22,7 +22,7 @@ class Client {
      * Client constructor.
      * @param string $endpoint
      * @param CachingInterface $cachingInterface
-     * @param ?array $headers
+     * @param array $headers
      */
     public function __construct(string $endpoint, CachingInterface $cachingInterface = null, array $headers = [])
     {
@@ -35,7 +35,7 @@ class Client {
      * @param string $componentLibrary
      * @param string $component
      * @param string|array $props
-     * @param array? $queryParams
+     * @param array $queryParams
      * @return RenderResult
      */
     public function render(string $componentLibrary, string $component, $props, array $queryParams = []): RenderResult
@@ -108,6 +108,7 @@ class Client {
     }
 
     /**
+     * Returns result of Theia server /config
      * @return array
      */
     public function config(): array {
@@ -123,6 +124,7 @@ class Client {
     }
 
     /**
+     * Returns result of Theia server /cache-config
      * @return array
      */
     public function cacheConfig(): array {
