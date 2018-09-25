@@ -12,7 +12,7 @@
 
 ### Interface: \CourseHero\Theia\CachingInterface
 
-> Interface CachingInterface
+> Interface for caching RenderResults
 
 | Visibility | Function |
 |:-----------|:---------|
@@ -23,7 +23,7 @@
 
 ### Class: \CourseHero\Theia\RenderResult
 
-> Class RenderResult
+> Theia render response
 
 | Visibility | Function |
 |:-----------|:---------|
@@ -37,7 +37,7 @@
 
 ### Class: \CourseHero\Theia\Client
 
-> Class Client
+> Rendering client for Theia
 
 | Visibility | Function |
 |:-----------|:---------|
