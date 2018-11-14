@@ -80,9 +80,6 @@ class Client {
         bool $force = false,
         int $secondsUntilExpires = self::THIRTY_DAYS
     ): RenderResult {
-        // default wendigo to true. job handling code should force this to false, so false postives aren't reported
-        $queryParams = array_merge(['wendigo' => true], $queryParams);
-
         if (is_array($props)) {
             $this->ksortRecursive($props);
             $propsAsString = json_encode($props);
